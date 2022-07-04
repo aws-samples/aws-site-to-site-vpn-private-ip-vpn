@@ -5,7 +5,7 @@ This repository contains terraform code to deploy an AWS Site-to-Site VPN Privat
 
 - Direct Connect gateway. If you want to test this code over an existing Direct Connect gateway, add its ID in the `dxgw_id` variable.
 - AWS Transit Gateway, and one Transit Gateway Route Table where all the VPCs and the VPN will be associated and they will propagate their routes.
-- Customer gateway, and **AWS Site-to-Site VPN Private IP VPN.
+- Customer gateway, and **AWS Site-to-Site VPN Private IP VPN**.
 - Two Amazon VPCs attached to the Transit Gateway (defined in the *locals.tf* file), with EC2 instances and SSM endpoints (decentralized) to test end-to-end connectivity once the VPN tunnels are configured.
 
 In both examples, some information is asked in the *variables.tf* file in order to create the hybrid network:
@@ -28,7 +28,7 @@ In both examples, some information is asked in the *variables.tf* file in order 
 
 ## Architecture
 
-![Architecture diagram](../../images/aws\_s2s\_private\_ip\_vpn.png)
+![Architecture diagram](../../images/aws_s2s_private_ip_vpn.png)
 
 ## Usage
 

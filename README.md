@@ -4,7 +4,7 @@ This sample contains [Terraform](./terraform) and [AWS CDK](./cdk) code to deplo
 
 - Direct Connect gateway. If you want to test this code over an existing Direct Connect gateway, both examples will allow you to add the resource ID of the DXGW, and a new one won't be created.
 - AWS Transit Gateway, and one Transit Gateway Route Table where all the VPCs and the VPN will be associated and they will propagate their routes.
-- Customer gateway, and AWS Site-to-Site VPN Private IP VPN.
+- Customer gateway, and **AWS Site-to-Site VPN Private IP VPN**.
 
 In both examples, some information is asked in order to create the hybrid network:
 
