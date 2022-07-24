@@ -1,3 +1,5 @@
+# Each example has its own .gitignore file. This root file is only used to avoid having common undesired files in the whole project.
+
 # macOs
 .DS_Store
 
