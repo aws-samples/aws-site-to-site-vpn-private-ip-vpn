@@ -3,32 +3,23 @@
 
 This repository contains terraform code to deploy an AWS Site-to-Site VPN Private IP VPN over AWS Direct Connect. The following resources are created by default:
 
-- Direct Connect gateway. If you want to test this code over an existing Direct Connect gateway, add its ID in the `dxgw_id` variable.
-- AWS Transit Gateway, and one Transit Gateway Route Table where all the VPCs and the VPN will be associated and they will propagate their routes.
+- Direct Connect gateway. By default, both examples create a new Direct Connect gateway resource. If you want to test this code over an existing Direct Connect gateway, check each specific example to understand how you can configure this.
 - Customer gateway, and **AWS Site-to-Site VPN Private IP VPN**.
-- Two Amazon VPCs attached to the Transit Gateway (defined in the *locals.tf* file), with EC2 instances and SSM endpoints (decentralized) to test end-to-end connectivity once the VPN tunnels are configured.
+- AWS Transit Gateway, and one Transit Gateway Route Table where all the VPCs and the VPN will be associated and they will propagate their routes.
+- Two Spoke VPCs, each of them with EC2 instances and VPC endpoints (AWS Systems Manager) to test the end-to-end connectivity.
 
-In both examples, some information is asked in the *variables.tf* file in order to create the hybrid network:
+In both examples, the following variables are defined with default values:
 
 - ASN numbers: AWS-side (for the Transit Gateway and the Direct Connect gateway), and customer-side (for the Customer gateway).
 - Transit Gateway CIDR block - used for the private Outer IPs when creating the VPN.
-- Allowed prefixes - AWS-side CIDR blocks. To add in the Direct Connect gateway (if created)
+- Allowed prefixes - AWS-side CIDR blocks to add in the Direct Connect gateway (if created)
 - Customer gateway IP - use the private IP of your device on premises.
 
-**The resources deployed and the architectural pattern they follow is purely for demonstration/testing purposes**. Take it as an example on how to create all the necessary resources to build a Private IP VPN on top of a Direct Connect connection. The configuration of the VPN tunnels in the on-premises routers is done as an usual AWS Site-to-Site VPN connection (check the documentation in the *References* section).
+Feel free to change these variables (check each example to see how you can do that) to build the Private IP VPN connection with values from your hybrid network.
 
-## Prerequisites
+![Architecture diagram](../images/aws\_s2s\_private\_ip\_vpn.png)
 
-- An AWS account with an IAM user with the appropriate permissions
-- Terraform installed
-
-## Code Principles
-
-- Writing DRY (Do No Repeat Yourself) code using a modular design pattern
-
-## Architecture
-
-![Architecture diagram](../../images/aws_s2s_private_ip_vpn.png)
+**The resources deployed and the architectural pattern they follow is purely for demonstration/testing purposes**. Take it as an example on how to create all the necessary resources to build a Private IP VPN on top of a Direct Connect connection. The AWS Direct Connect connection and Transit VIF required to finish the end-to-end connectivity are not built in this example. The configuration of the VPN tunnels in the on-premises routers is done as an usual AWS Site-to-Site VPN connection (check the documentation in the *References* section).
 
 ## Usage
 
@@ -45,6 +36,14 @@ In both examples, some information is asked in the *variables.tf* file in order 
 
 - AWS Blog: [Introducing AWS Site-to-Site VPN Private IP VPNs](https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-aws-site-to-site-vpn-private-ip-vpns/)
 - AWS Documentation: [AWS Site-to-Site VPN - Getting Started](https://docs.aws.amazon.com/vpn/latest/s2svpn/SetUpVPNConnections.html)
+
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.
 
 ## Requirements
 
@@ -66,7 +65,7 @@ In both examples, some information is asked in the *variables.tf* file in order 
 | <a name="module_compute"></a> [compute](#module\_compute) | ./modules/compute | n/a |
 | <a name="module_iam_kms"></a> [iam\_kms](#module\_iam\_kms) | ./modules/iam_kms | n/a |
 | <a name="module_vpc_endpoints"></a> [vpc\_endpoints](#module\_vpc\_endpoints) | ./modules/vpc_endpoints | n/a |
-| <a name="module_vpcs"></a> [vpcs](#module\_vpcs) | aws-ia/vpc/aws | 1.4.0 |
+| <a name="module_vpcs"></a> [vpcs](#module\_vpcs) | aws-ia/vpc/aws | 1.4.1 |
 
 ## Resources
 
@@ -76,12 +75,11 @@ In both examples, some information is asked in the *variables.tf* file in order 
 | [aws_dx_gateway.dxgw](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/dx_gateway) | resource |
 | [aws_dx_gateway_association.dxgw_tgw_association](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/dx_gateway_association) | resource |
 | [aws_ec2_transit_gateway.tgw](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway) | resource |
-| [aws_ec2_transit_gateway_route_table.spoke_tgw_rt](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table) | resource |
-| [aws_ec2_transit_gateway_route_table.vpn_tgw_rt](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table) | resource |
+| [aws_ec2_transit_gateway_route_table.tgw_rt](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table) | resource |
 | [aws_ec2_transit_gateway_route_table_association.spoke_tgw_association](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table_association) | resource |
 | [aws_ec2_transit_gateway_route_table_association.vpn_tgw_association](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table_association) | resource |
-| [aws_ec2_transit_gateway_route_table_propagation.vpcs_to_vpn_rt_propagation](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table_propagation) | resource |
-| [aws_ec2_transit_gateway_route_table_propagation.vpn_to_vpc_rt_propagation](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table_propagation) | resource |
+| [aws_ec2_transit_gateway_route_table_propagation.spoke_tgw_propagation](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table_propagation) | resource |
+| [aws_ec2_transit_gateway_route_table_propagation.vpn_tgw_propagation](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/ec2_transit_gateway_route_table_propagation) | resource |
 | [aws_vpn_connection.private_ip_vpn](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/resources/vpn_connection) | resource |
 | [aws_ec2_transit_gateway_dx_gateway_attachment.tgw_dxgw_attachment](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/data-sources/ec2_transit_gateway_dx_gateway_attachment) | data source |
 | [aws_ec2_transit_gateway_vpn_attachment.vpn_tgw_attachment](https://registry.terraform.io/providers/hashicorp/aws/4.20.0/docs/data-sources/ec2_transit_gateway_vpn_attachment) | data source |

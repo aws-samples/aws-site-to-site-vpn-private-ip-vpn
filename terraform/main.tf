@@ -77,7 +77,7 @@ data "aws_ec2_transit_gateway_vpn_attachment" "vpn_tgw_attachment" {
 module "vpcs" {
   for_each = local.spoke_vpcs
   source   = "aws-ia/vpc/aws"
-  version  = "1.4.0"
+  version  = "1.4.1"
 
   name       = each.key
   cidr_block = each.value.cidr_block
@@ -107,18 +107,11 @@ module "vpcs" {
   }
 }
 
-# Transit Gateway Route Tables
-resource "aws_ec2_transit_gateway_route_table" "spoke_tgw_rt" {
+# Transit Gateway Route Table, Associations, and Propagations
+resource "aws_ec2_transit_gateway_route_table" "tgw_rt" {
   transit_gateway_id = aws_ec2_transit_gateway.tgw.id
   tags = {
-    Name = "spoke-tgw-rt-${var.identifier}"
-  }
-}
-
-resource "aws_ec2_transit_gateway_route_table" "vpn_tgw_rt" {
-  transit_gateway_id = aws_ec2_transit_gateway.tgw.id
-  tags = {
-    Name = "vpn-tgw-rt-${var.identifier}"
+    Name = "tgw-rt-${var.identifier}"
   }
 }
 
@@ -127,25 +120,25 @@ resource "aws_ec2_transit_gateway_route_table_association" "spoke_tgw_associatio
   for_each = module.vpcs
 
   transit_gateway_attachment_id  = each.value.transit_gateway_attachment_id
-  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.spoke_tgw_rt.id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.tgw_rt.id
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "vpn_tgw_association" {
   transit_gateway_attachment_id  = data.aws_ec2_transit_gateway_vpn_attachment.vpn_tgw_attachment.id
-  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.vpn_tgw_rt.id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.tgw_rt.id
 }
 
 # Transit Gateway Propagations
-resource "aws_ec2_transit_gateway_route_table_propagation" "vpcs_to_vpn_rt_propagation" {
+resource "aws_ec2_transit_gateway_route_table_propagation" "spoke_tgw_propagation" {
   for_each = module.vpcs
 
   transit_gateway_attachment_id  = each.value.transit_gateway_attachment_id
-  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.vpn_tgw_rt.id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.tgw_rt.id
 }
 
-resource "aws_ec2_transit_gateway_route_table_propagation" "vpn_to_vpc_rt_propagation" {
+resource "aws_ec2_transit_gateway_route_table_propagation" "vpn_tgw_propagation" {
   transit_gateway_attachment_id  = data.aws_ec2_transit_gateway_vpn_attachment.vpn_tgw_attachment.id
-  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.spoke_tgw_rt.id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.tgw_rt.id
 }
 
 # EC2 Instances
@@ -176,6 +169,7 @@ module "vpc_endpoints" {
   endpoints_service_names  = local.endpoint_service_names
 }
 
+# IAM Roles and KMS Key used in several resources (EC2 instances, and VPC Flow Logs)
 module "iam_kms" {
   source     = "./modules/iam_kms"
   identifier = var.identifier
