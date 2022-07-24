@@ -1,0 +1,20 @@
+AppName: "private-ip-vpn-example"
+
+ASNNumbers:
+  AmazonSideDXGW : 64531
+  AmazonSideTGW : 64532
+  CustomerSide : 64533
+
+Parameters:
+  TGWCIDR : "10.0.0.0/24"
+  DXPrefixes : "10.0.0.0/8"
+  CGWIP : "10.0.0.1"
+
+VPCA:
+  CIDR: "10.0.1.0/24"
+  CIDRtoTGW: "10.0.2.0/24"
+
+VPCB:
+  CIDR: "10.0.2.0/24"
+  CIDRtoTGW: "10.0.1.0/24"
+    
