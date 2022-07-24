@@ -1,4 +1,4 @@
-# AWS Site-to-Site VPN Private IP VPN - CDK
+# AWS Site-to-Site VPN Private IP VPN - AWS CDK (Typescript)
 
 This repository contains AWS CDK code to deploy an AWS Site-to-Site VPN Private IP VPN over AWS Direct Connect. The following resources are created by default:
 
